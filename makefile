@@ -16,7 +16,7 @@ CUDA_LIBDIR = lib
 
 INCPATHS    =-I"$(CUDA_INSTALL_DIR)/include" -I"/usr/local/include" -I".."
 LIBPATHS    =-L"$(CUDA_INSTALL_DIR)/targets/$(TRIPLE)/$(CUDA_LIBDIR)" -L"/usr/local/lib" -L"$(CUDA_INSTALL_DIR)/$(CUDA_LIBDIR)"
-COMMON_LIBS = -lcudart -lcudart_static `pkg-config --cflags --libs opencv` -std=c++11
+COMMON_LIBS = -lcudart -lcudart_static -std=c++11
 
 # VPATH = ..
 
