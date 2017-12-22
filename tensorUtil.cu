@@ -295,7 +295,7 @@ Tensor *createSlicedTensor(const Tensor *src, int dim, int start, int len)
      return dst;
 }
 
-__global__ void sliceTensorKernel()
+__global__ void sliceTensorKernel(float *src_data, float *dst_data, ...)
 {
 }
 
@@ -303,7 +303,7 @@ Tensor *sliceTensor(const Tensor *src, Tensor *dst, int dim, int start, int len)
 {
      /* Your code here. You can have a cuda kernel below. */
 
-     /* sliceTensorKernel<<<block_num, block_size>>>() */
+     /* sliceTensorKernel<<<block_num, block_size>>>(src->data, dst->data, ...) */
 
      return dst;
 }

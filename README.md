@@ -27,6 +27,7 @@
    c : 从断点处接着运行;
    n : 按行执行;
    s : 按步执行（遇到函数会进入）;
+   p <variable> : 打印变量名为 <variable> 的变量内容;
    bt: 打印调用栈;
    q : 退出
    ```
@@ -38,4 +39,4 @@
 ## 任务清单
 1. 张量切片操作
 
-   在 `tensorUtil.cu` 中完成张量切片操作 `sliceTensor` 。操作所需的张量定义、辅助函数均已写好，只需完成 `sliceTensor` 即可，在 `sliceTensor` 函数中调用 CUDA 核函数 `sliceTensorkernel` 。代码写完后，编译并执行 `./testtu` 会执行一个测试用例，在屏幕上显示执行结果。
+   在 `tensorUtil.cu` 中完成张量切片操作 `sliceTensor` 。操作所需的张量定义、辅助函数均已写好，只需完成 `sliceTensor` 即可，在 `sliceTensor` 函数中调用 CUDA 核函数 `sliceTensorkernel` 。代码写完后，编译并执行 `./testtu` 会执行一个测试用例，在屏幕上显示执行结果。测试用例在 `test.c` 中给出，host端只把 `tensor.data` 传入显存，没有把 `tensor.dims` 传入，故不要在 `sliceTensorKernel` 中操作 `tensor.dims` 指针。
