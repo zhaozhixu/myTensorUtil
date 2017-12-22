@@ -34,4 +34,5 @@
 
 ## 任务清单
 1. 张量切片操作
+
    在 `tensorUtil.cu` 中完成张量切片操作 `sliceTensor` 。操作所需的张量定义、辅助函数均已写好，只需完成 `sliceTensor` 即可，在 `sliceTensor` 函数中调用 CUDA 核函数 `sliceTensorkernel` 。代码写完后，编译并执行 `./testtu` 会执行一个测试用例，在屏幕上显示执行结果。
