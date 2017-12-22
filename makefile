@@ -1,40 +1,92 @@
+.SUFFIXES:
 CC = g++
-CUCC = nvcc -m64
-TARGET = testtu
+CUCC = nvcc
 
-ifeq ($(DEBUG),1)
-CC += -g -O0 -DDEBUG
-CUCC += -lineinfo -ccbin $(CC)
+CFLAGS = -std=c++11 -Wall
+CUFLAGS = -m64 -ccbin $(CC)
+LDFLAGS = $(CFLAGS)
+
+ifdef DEBUG
+CFLAGS += -g -O0 -DDEBUG
+CUFLAGS += -lineinfo
+LDFLAGS += -g -O0
 else
-CC += -O3 -DNDEBUG
-CUCC += -ccbin $(CC)
+CFLAGS += -O3 -DNDEBUG
+CUFLAGS +=
+LDFLAGS += -O3
 endif
+
+ifdef VERBOSE
+AT=
+else
+AT=@
+endif
+
+AR = ar cr
+ECHO = @echo
+SHELL=/bin/sh
 
 TRIPLE?=x86_64-linux
 CUDA_INSTALL_DIR = /usr/local/cuda-8.0
 CUDA_LIBDIR = lib
-
-INCPATHS    =-I"$(CUDA_INSTALL_DIR)/include" -I"/usr/local/include" -I".."
+INCPATHS    =-I"$(CUDA_INSTALL_DIR)/include" -I"/usr/local/include"
 LIBPATHS    =-L"$(CUDA_INSTALL_DIR)/targets/$(TRIPLE)/$(CUDA_LIBDIR)" -L"/usr/local/lib" -L"$(CUDA_INSTALL_DIR)/$(CUDA_LIBDIR)"
-COMMON_LIBS = -lcudart -lcudart_static -std=c++11
+LIBS = -lcudart -lcudart_static
+CFLAGS += $(INCPATHS)
+CUFLAGS += $(INCPATHS)
+LDFLAGS += $(LIBPATHS)
 
-# VPATH = ..
+define concat
+  $1$2$3$4$5$6$7$8
+endef
 
-# $(TARGET): test.o tensorUtil.o tensorCuda.o trtUtil.o errorHandle.o
-# 	$(CC) -Wall -g test.o trtUtil.o tensorUtil.o tensorCuda.o errorHandle.o -o testtrt $(INCPATHS) $(LIBPATHS) $(COMMON_LIBS)
-$(TARGET): test.o tensorUtil.o errorHandle.o sdt_alloc.o
-	$(CC) -Wall test.o tensorUtil.o errorHandle.o sdt_alloc.o -o $(TARGET) $(INCPATHS) $(LIBPATHS) $(COMMON_LIBS)
-test.o: test.c tensorUtil.h errorHandle.h sdt_alloc.h
-	$(CC) -c test.c $(INCPATHS) $(LIBPATHS) $(COMMON_LIBS)
-# trtUtil.o: trtUtil.cpp trtUtil.h errorHandle.h
-# 	$(CUCC) -c trtUtil.cpp $(INCPATHS) $(LIBPATHS) $(COMMON_LIBS)
-tensorUtil.o: tensorUtil.cu tensorUtil.h errorHandle.h sdt_alloc.h
-	$(CUCC) -c tensorUtil.cu $(INCPATHS) $(LIBPATHS) $(COMMON_LIBS)
-# tensorCuda.o: tensorCuda.cu tensorCuda.h errorHandle.h
-# 	$(CUCC) -g -c tensorCuda.cu $(INCPATHS) $(LIBPATHS) $(COMMON_LIBS)
-errorHandle.o: errorHandle.cu errorHandle.h
-	$(CUCC) -c errorHandle.cu $(INCPATHS) $(LIBPATHS) $(COMMON_LIBS)
-sdt_alloc.o: sdt_alloc.c sdt_alloc.h
-	$(CC) -c sdt_alloc.c $(INCPATHS) $(LIBPATHS) $(COMMON_LIBS)
+#$(call make-depend,source-file,object-file,depend-file)
+define make-depend
+  $(AT)$(CC) -MM -MF $3 -MP -MT $2 $(CFLAGS) $1
+endef
+
+define make-depend-cu
+  $(AT)$(CUCC) -M $(CUFLAGS) $1 > $3.$$$$; \
+  sed 's,.*\.o[ :]*,$2 : ,g' < $3.$$$$ > $3; \
+  rm -f $3.$$$$
+endef
+
+SRCS_C = test.c tensorUtil.cu errorHandle.cu sdt_alloc.c
+TARGET = testtu
+OUTDIR = .
+OBJDIR = $(call concat,$(OUTDIR),/obj)
+OBJS   = $(patsubst %.c, $(OBJDIR)/%.o, $(wildcard *.c))
+OBJS  += $(patsubst %.cpp, $(OBJDIR)/%.o, $(wildcard *.cpp))
+CUOBJS = $(patsubst %.cu, $(OBJDIR)/%.o, $(wildcard *.cu))
+
+.PHONY: all
+all: $(TARGET)
+
+$(OUTDIR)/$(TARGET): $(OBJS) $(CUOBJS)
+	$(ECHO) Linking: $<
+	$(AT)$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
+
+$(OBJDIR)/%.o: %.c
+	$(AT)if [ ! -d $(OBJDIR) ]; then mkdir -p $(OBJDIR); fi
+	$(call make-depend,$<,$@,$(subst .o,.d,$@))
+	$(ECHO) Compiling: $<
+	$(AT)$(CC) $(CFLAGS) -c -o $@ $<
+
+$(OBJDIR)/%.o: %.cpp
+	$(AT)if [ ! -d $(OBJDIR) ]; then mkdir -p $(OBJDIR); fi
+	$(call make-depend,$<,$@,$(subst .o,.d,$@))
+	$(ECHO) Compiling: $<
+	$(AT)$(CC) $(CFLAGS) -c -o $@ $<
+
+$(OBJDIR)/%.o: %.cu
+	$(AT)if [ ! -d $(OBJDIR) ]; then mkdir -p $(OBJDIR); fi
+	$(call make-depend-cu,$<,$@,$(subst .o,.d,$@))
+	$(ECHO) Compiling CUDA: $<
+	$(AT)$(CUCC) $(CUFLAGS) -c -o $@ $<
+
 clean:
-	rm -f *.o
+	rm -rf $(OBJDIR)
+
+ifneq "$(MAKECMDGOALS)" "clean"
+  -include $(OBJDIR)/*.d
+endif
