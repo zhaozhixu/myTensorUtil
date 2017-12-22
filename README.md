@@ -1,6 +1,7 @@
+# myTensorUtil
 这是一个测试用 TensorUtil 仓库
 
-# 使用方法
+## 使用方法
 1. 下载本仓库到本地
 
 2. 在 `tensorUtil.cu` 和 `tensorUtil.h` 中编写你的代码
@@ -23,6 +24,6 @@
 
 5. 使用 `./testtu` 执行代码
 
-# 任务清单
+## 任务清单
 1. 张量切片操作
    在 `tensorUtil.cu` 中完成张量切片操作 `sliceTensor` 。操作所需的张量定义、辅助函数均已写好，只需完成 `sliceTensor` 即可，在 `sliceTensor` 函数中调用 CUDA 核函数 `sliceTensorkernel` 。代码写完后，编译并执行 `./testtu` 会执行一个测试用例，在屏幕上显示执行结果。
