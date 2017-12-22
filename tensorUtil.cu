@@ -295,36 +295,15 @@ Tensor *createSlicedTensor(const Tensor *src, int dim, int start, int len)
      return dst;
 }
 
-__global__ void sliceTensorKernel(float *src, float *dst, int start, int s_vol, int d_vol, int vol, int block_size, int total)
+__global__ void sliceTensorKernel()
 {
-     int di = blockIdx.x * block_size + threadIdx.x;
-     if (di >= total)
-          return;
-     int si = di / d_vol * s_vol + di % d_vol + start * vol;
-     dst[di] = src[si];
 }
 
 Tensor *sliceTensor(const Tensor *src, Tensor *dst, int dim, int start, int len)
 {
-     /* Your code here. You can have a cuda kernel here. */
-     /* sliceTensorKernel<<< >>>; */
+     /* Your code here. You can have a cuda kernel below. */
 
-     assert(isTensorValid(src) && isTensorValid(dst));
-     assert(isDeviceMem(src->data) && isDeviceMem(dst->data));
-     assert(dst->ndim == src->ndim);
-     for (int i = 0; i < dst->ndim; i++)
-          assert(i == dim ? dst->dims[i] == len : dst->dims[i] == src->dims[i]);
+     /* sliceTensorKernel<<<block_num, block_size>>>() */
 
-     int i, d_vol, s_vol, vol;
-     int thread_num, block_size, block_num; /* block size and number of cuda threads */
-     for (i = dim+1, vol = 1; i < dst->ndim; i++)
-          vol *= dst->dims[i];
-     d_vol = vol * dst->dims[dim];
-     s_vol = vol * src->dims[dim];
-     thread_num = dst->len;
-     block_size = MAX_THREADS_PER_BLOCK;
-     block_num = thread_num / block_size + 1;
-
-     sliceTensorKernel<<<block_num, block_size>>>(src->data, dst->data, start, s_vol, d_vol, vol, block_size, thread_num);
      return dst;
 }
