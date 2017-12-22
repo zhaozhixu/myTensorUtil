@@ -7,20 +7,28 @@
 2. 在 `tensorUtil.cu` 和 `tensorUtil.h` 中编写你的代码
 
 3. 在命令行中输入
-   `make `
+   ```
+   make
+   ```
    编译程序。如果想加入 debug 符号表，使用
-   `make DEBUG=1`
+   ```
+   make DEBUG=1
+   ```
    清除项目目标文件以便重新编译，使用
-   `make clean`
+   ```
+   make clean
+   ```
 
 4. Debug 时，需要先使用 `make DEBUG=1` 生成项目，然后使用 `gdb ./testtu` 打开调试器，下面是一些常用命令：
-   `r` 开始运行/重新运行;
-   `b <line-number>` 在行号 <line-number> 处打断点;
-   `d <breakpoint-number>` 删除断点编号为 <breakpoint-number> 的断点;
-   `c` 从断点处接着运行;
-   `n` 按行执行;
-   `s` 按步执行（遇到函数会进入）;
-   `q` 退出
+   ```
+   r 开始运行/重新运行;
+   b <line-number>` 在行号 <line-number> 处打断点;
+   d <breakpoint-number>` 删除断点编号为 <breakpoint-number> 的断点;
+   c 从断点处接着运行;
+   n 按行执行;
+   s 按步执行（遇到函数会进入）;
+   q 退出
+   ```
 
 5. 使用 `./testtu` 执行代码
 
